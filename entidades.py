@@ -94,7 +94,7 @@ class Inimigo(pygame.sprite.Sprite):
             self.pos.y += self.direcao.y
             self.rect.centery = int(self.pos.y)
             self.Colisao('y', paredes)
-            
+
     def EstaVendo(self, alvo, paredes):
         for parede in paredes:
             if parede.rect.clipline(self.rect.center, alvo.rect.center):
@@ -118,7 +118,7 @@ class Inimigo(pygame.sprite.Sprite):
             elif direcao == 'y':
                 if self.direcao.y > 0:
                     self.rect.bottom = parede.rect.top
-                elif self.rect.y < 0:
+                elif self.direcao.y < 0:
                     self.rect.top = parede.rect.bottom
 
                 self.pos.y = self.rect.centery

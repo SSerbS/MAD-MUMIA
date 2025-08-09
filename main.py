@@ -46,18 +46,17 @@ for id_linha, linha in enumerate(layout):
 
 todos_os_sprites.add(jogador)
 todos_os_sprites.add(inimigo)
-# --- Loop Principal ---
+
 rodando = True
 while rodando:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             rodando = False
 
-    # --- Atualização ---
-    # Passamos os grupos como argumentos para o método update do jogador
+
     jogador.update(paredes)
     inimigo.update(jogador, 1000, paredes)
-    # --- Desenho ---
+
     tela.fill((30, 30, 30))
     todos_os_sprites.draw(tela)
 
