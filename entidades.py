@@ -1,5 +1,5 @@
 import pygame
-
+  
 class Jogador(pygame.sprite.Sprite):
 
     def __init__(self, x, y):
@@ -25,8 +25,8 @@ class Jogador(pygame.sprite.Sprite):
             self.vel.y = -self.velocidade
         if teclas[pygame.K_s]:
             self.vel.y = self.velocidade
-        
-       
+
+
         if self.vel.length() != 0: 
             self.vel.normalize_ip()
             self.vel *= self.velocidade
@@ -40,7 +40,7 @@ class Jogador(pygame.sprite.Sprite):
         self.pos.y += self.vel.y
         self.rect.centery = int(self.pos.y)
         self.Colisao('y', paredes)
-                
+
     def Colisao(self, direcao, paredes):
 
         self.colisoes = pygame.sprite.spritecollide(self, paredes.sprites(), False)
@@ -76,13 +76,16 @@ class Inimigo(pygame.sprite.Sprite):
         self.dano = dano
         self.vida = vida
         self.pos = pygame.math.Vector2(x, y)
+
+        
         self.ultima_posicao_jogador = None
         Inimigo.inimigos.add(self)
+
 
     def update(self, alvo, alcance_visao, paredes, checar_ultima_posicao_jogador):
 
         self.direcao = pygame.math.Vector2(alvo.pos.x - self.pos.x, alvo.pos.y - self.pos.y)
-        
+
         self.distancia = int(self.direcao.magnitude())
         #distancia = int((dx**2 + dy**2)**0.5)
 
@@ -92,7 +95,7 @@ class Inimigo(pygame.sprite.Sprite):
             if self.direcao.length() != 0:
                 self.direcao.normalize_ip()
                 self.direcao *= self.velocidade
-            
+
             self.pos.x += self.direcao.x
             self.rect.centerx = int(self.pos.x)
             self.Colisao('x', paredes)
@@ -111,7 +114,7 @@ class Inimigo(pygame.sprite.Sprite):
             if parede.rect.clipline(self.rect.center, alvo.rect.center):
                 return False
         return True
-    
+
     def Colisao(self, direcao, paredes):
 
         self.colisoes = pygame.sprite.spritecollide(self, paredes.sprites(), False)
@@ -122,10 +125,10 @@ class Inimigo(pygame.sprite.Sprite):
             if direcao == 'x':
                 if self.direcao.x > 0:
                     self.rect.right = parede.rect.left
-        
+
                 elif self.direcao.x < 0:
                     self.rect.left = parede.rect.right
-                
+
                 self.pos.x = self.rect.centerx
 
             elif direcao == 'y':
@@ -135,16 +138,16 @@ class Inimigo(pygame.sprite.Sprite):
                     self.rect.top = parede.rect.bottom
 
                 self.pos.y = self.rect.centery
-            
+
         for outro_inimigo in self.colisoes_inimigos:
             if outro_inimigo != self:
                 if direcao == 'x':
                     if self.direcao.x > 0:
                         self.rect.right = outro_inimigo.rect.left
-            
+
                     elif self.direcao.x < 0:
                         self.rect.left = outro_inimigo.rect.right
-                    
+
                     self.pos.x = self.rect.centerx
 
                 elif direcao == 'y':
@@ -153,6 +156,7 @@ class Inimigo(pygame.sprite.Sprite):
                     elif self.direcao.y < 0:
                         self.rect.top = outro_inimigo.rect.bottom
 
+                    self.pos.y = self.rect.centery
                     self.pos.y = self.rect.centery
 
     def VerificarUltimaPosicao(self, ultima_posicao, paredes):
