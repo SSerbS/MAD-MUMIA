@@ -76,11 +76,10 @@ class Inimigo(pygame.sprite.Sprite):
         self.dano = dano
         self.vida = vida
         self.pos = pygame.math.Vector2(x, y)
-
-        
+        self.ultima_posicao_jogador = None
         Inimigo.inimigos.add(self)
 
-    def update(self, alvo, alcance_visao, paredes):
+    def update(self, alvo, alcance_visao, paredes, checar_ultima_posicao_jogador):
 
         self.direcao = pygame.math.Vector2(alvo.pos.x - self.pos.x, alvo.pos.y - self.pos.y)
         
@@ -88,6 +87,8 @@ class Inimigo(pygame.sprite.Sprite):
         #distancia = int((dx**2 + dy**2)**0.5)
 
         if self.distancia <= alcance_visao and self.EstaVendo(alvo, paredes) and alvo.rect.colliderect(self.rect) == False:
+
+            self.ultima_posicao_jogador = pygame.math.Vector2(alvo.pos.x, alvo.pos.y)
             if self.direcao.length() != 0:
                 self.direcao.normalize_ip()
                 self.direcao *= self.velocidade
@@ -100,6 +101,11 @@ class Inimigo(pygame.sprite.Sprite):
             self.rect.centery = int(self.pos.y)
             self.Colisao('y', paredes)
 
+        elif self.EstaVendo(alvo, paredes) == False:
+            if checar_ultima_posicao_jogador:
+                self.VerificarUltimaPosicao(self.ultima_posicao_jogador, paredes)
+
+
     def EstaVendo(self, alvo, paredes):
         for parede in paredes:
             if parede.rect.clipline(self.rect.center, alvo.rect.center):
@@ -107,6 +113,7 @@ class Inimigo(pygame.sprite.Sprite):
         return True
     
     def Colisao(self, direcao, paredes):
+
         self.colisoes = pygame.sprite.spritecollide(self, paredes.sprites(), False)
         self.colisoes_inimigos = pygame.sprite.spritecollide(self, Inimigo.inimigos.sprites(), False)
 
@@ -147,3 +154,25 @@ class Inimigo(pygame.sprite.Sprite):
                         self.rect.top = outro_inimigo.rect.bottom
 
                     self.pos.y = self.rect.centery
+
+    def VerificarUltimaPosicao(self, ultima_posicao, paredes):
+        if ultima_posicao == None:
+            return
+        
+        self.direcao = pygame.math.Vector2(ultima_posicao.x - self.pos.x, ultima_posicao.y - self.pos.y)
+        self.distancia = int(self.direcao.magnitude())
+
+        if self.direcao.length() != 0:
+                self.direcao.normalize_ip()
+                self.direcao *= self.velocidade
+            
+        self.pos.x += self.direcao.x
+        self.rect.centerx = int(self.pos.x)
+        self.Colisao('x', paredes)
+
+        self.pos.y += self.direcao.y
+        self.rect.centery = int(self.pos.y)
+        self.Colisao('y', paredes)
+
+        if self.pos == ultima_posicao:
+            ultima_posicao = None

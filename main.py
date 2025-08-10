@@ -56,8 +56,8 @@ while rodando:
 
 
     jogador.update(paredes)
-    inimigo.update(jogador, 1000, paredes)
-    inimigo2.update(jogador, 1000, paredes)
+    inimigo.update(jogador, 300, paredes, False)
+    inimigo2.update(jogador, 300, paredes, True)
     tela.fill((30, 30, 30))
     todos_os_sprites.draw(tela)
 
