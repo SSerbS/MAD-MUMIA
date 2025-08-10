@@ -10,10 +10,11 @@ clock = pygame.time.Clock()
 # --- Grupos de Sprites ---
 todos_os_sprites = pygame.sprite.Group()
 paredes = pygame.sprite.Group()
-
+inimigos = pygame.sprite.Group()
 # --- Instanciando Objetos ---
 jogador = Jogador(150, 150)
 inimigo = Inimigo(50, 50, 1, 1, 10)
+inimigo2 = Inimigo(150, 150, 1, 1, 10)
 # Layout do nível
 layout = [
     "PPPPPPPPPPPPPPPP",
@@ -22,8 +23,8 @@ layout = [
     "P      P       P",
     "P  J   P       P",
     "P      P       P",
-    "P  E   PPPPPPPPP",
-    "P              P",
+    "P      PPPPPPPPP",
+    "P          E   P",
     "PPPPPPPPPPPPPPPP",
 ]
 
@@ -46,7 +47,7 @@ for id_linha, linha in enumerate(layout):
 
 todos_os_sprites.add(jogador)
 todos_os_sprites.add(inimigo)
-
+todos_os_sprites.add(inimigo2)
 rodando = True
 while rodando:
     for event in pygame.event.get():
@@ -56,7 +57,7 @@ while rodando:
 
     jogador.update(paredes)
     inimigo.update(jogador, 1000, paredes)
-
+    inimigo2.update(jogador, 1000, paredes)
     tela.fill((30, 30, 30))
     todos_os_sprites.draw(tela)
 

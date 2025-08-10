@@ -63,6 +63,8 @@ class Jogador(pygame.sprite.Sprite):
 
 class Inimigo(pygame.sprite.Sprite):
 
+    inimigos = pygame.sprite.Group()
+
     def __init__(self, x, y, velocidade, dano, vida):
         super().__init__()
 
@@ -74,7 +76,10 @@ class Inimigo(pygame.sprite.Sprite):
         self.dano = dano
         self.vida = vida
         self.pos = pygame.math.Vector2(x, y)
+
         
+        Inimigo.inimigos.add(self)
+
     def update(self, alvo, alcance_visao, paredes):
 
         self.direcao = pygame.math.Vector2(alvo.pos.x - self.pos.x, alvo.pos.y - self.pos.y)
@@ -82,7 +87,7 @@ class Inimigo(pygame.sprite.Sprite):
         self.distancia = int(self.direcao.magnitude())
         #distancia = int((dx**2 + dy**2)**0.5)
 
-        if self.distancia <= alcance_visao and self.EstaVendo(alvo, paredes):
+        if self.distancia <= alcance_visao and self.EstaVendo(alvo, paredes) and alvo.rect.colliderect(self.rect) == False:
             if self.direcao.length() != 0:
                 self.direcao.normalize_ip()
                 self.direcao *= self.velocidade
@@ -103,6 +108,7 @@ class Inimigo(pygame.sprite.Sprite):
     
     def Colisao(self, direcao, paredes):
         self.colisoes = pygame.sprite.spritecollide(self, paredes.sprites(), False)
+        self.colisoes_inimigos = pygame.sprite.spritecollide(self, Inimigo.inimigos.sprites(), False)
 
         for parede in self.colisoes:
 
@@ -122,3 +128,22 @@ class Inimigo(pygame.sprite.Sprite):
                     self.rect.top = parede.rect.bottom
 
                 self.pos.y = self.rect.centery
+            
+        for outro_inimigo in self.colisoes_inimigos:
+            if outro_inimigo != self:
+                if direcao == 'x':
+                    if self.direcao.x > 0:
+                        self.rect.right = outro_inimigo.rect.left
+            
+                    elif self.direcao.x < 0:
+                        self.rect.left = outro_inimigo.rect.right
+                    
+                    self.pos.x = self.rect.centerx
+
+                elif direcao == 'y':
+                    if self.direcao.y > 0:
+                        self.rect.bottom = outro_inimigo.rect.top
+                    elif self.direcao.y < 0:
+                        self.rect.top = outro_inimigo.rect.bottom
+
+                    self.pos.y = self.rect.centery
