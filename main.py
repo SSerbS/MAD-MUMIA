@@ -113,8 +113,9 @@ while rodando:
     pygame.sprite.groupcollide(balas, paredes, True, False)
     pygame.sprite.groupcollide(balas, inimigos, True, True)
     
-    tela.fill((30, 30, 30))
-    todos_os_sprites.draw(tela)
+    tela.fill("darkgreen")
+    for sprite in todos_os_sprites:
+        tela.blit(sprite.image, the_camera.apply(sprite))
    
     score_texto = fonte_score.render(f"{score}", True, "green")
     tela.blit(score_texto, (20, 20))
