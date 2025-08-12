@@ -3,22 +3,23 @@ import pygame
 from entidades import *
 from paredes import *
 from coletaveis import *
+from camera import *
+
 pygame.init()
-tela = pygame.display.set_mode((800, 720))
+largura_tela = 1280
+altura_tela = 720
+tela = pygame.display.set_mode((largura_tela, altura_tela))
 pygame.display.set_caption("Sokoban Simples")
 clock = pygame.time.Clock()
-
 
 todos_os_sprites = pygame.sprite.Group()
 balas = pygame.sprite.Group()
 paredes = pygame.sprite.Group()
 inimigos = pygame.sprite.Group()
 
-
 todos_coletaveis = pygame.sprite.Group()
 
-
-
+# --- Instanciando Objetos ---
 jogador = Jogador(150, 150)
 inimigo = Inimigo(50, 50, 1, 1, 10)
 inimigo2 = Inimigo(150, 150, 1, 1, 10)
@@ -27,26 +28,29 @@ inimigos.add(inimigo, inimigo2)
 
 posicoes_dos_itens = [(200, 100), (700, 375), (600, 250)]
 
-
 # Layout do nível
 layout = [
-    "PPPPPPPPPPPPPPPP",
-    "P              P",
-    "P      P       P",
-    "P      P       P",
-    "P  J   P       P",
-    "P      P       P",
-    "P      PPPPPPPPP",
-    "P          E   P",
-    "P              P",
-    "P              P",
-    "P              P",
-    "P              P",
-    "P              P",
-    "P              P",
-    "P              P",
-    "PPPPPPPPPPPPPPPP",
+    "PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP",
+    "P              PPPPPPP         P",
+    "P      P       PPPPPPP         P",
+    "P      P       PPPPPPP         P",
+    "P  J   P       PPPPPPP         P",
+    "P      P       PPPPPPP         P",
+    "P      PPPPPPPPPPPPPPP         P",
+    "P          E   PPPPPPP         P",
+    "P              PPPPPPP         P",
+    "P              PPPPPPP         P",
+    "P              PPPPPPP         P",
+    "P              PPPPPPP         P",
+    "P              PPPPPPP         P",
+    "P                              P",
+    "P                              P",
+    "PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP",
 ]
+
+largura_mundo = len(layout[0])*50
+altura_mundo = len(layout)*50
+the_camera = Camera(largura_tela, altura_tela, largura_mundo, altura_mundo)
 
 for id_linha, linha in enumerate(layout):
     for id_coluna, char in enumerate(linha):
@@ -71,7 +75,7 @@ for pos in posicoes_dos_itens:
     todos_coletaveis.add(item_novo)
 
 
-#todos_os_sprites.add(jogador)
+todos_os_sprites.add(jogador)
 todos_os_sprites.add(inimigo)
 todos_os_sprites.add(inimigo2)
 
@@ -91,8 +95,8 @@ while rodando:
     jogador.update(paredes)
     inimigo.update(jogador, 300, paredes, False)
     inimigo2.update(jogador, 300, paredes, True)
+    the_camera.update(jogador)
 
-    
     itens_atingidos = pygame.sprite.spritecollide(jogador, todos_coletaveis, True)
     if itens_atingidos != []:
         print("coletou")
@@ -108,9 +112,10 @@ while rodando:
     balas.update(tela)
     pygame.sprite.groupcollide(balas, paredes, True, False)
     pygame.sprite.groupcollide(balas, inimigos, True, True)
+    
     tela.fill((30, 30, 30))
     todos_os_sprites.draw(tela)
-    tela.blit(jogador.image, jogador.rect)
+   
     score_texto = fonte_score.render(f"{score}", True, "green")
     tela.blit(score_texto, (20, 20))
     municao_texto = fonte_municao.render(f"Balas: {jogador.balas}", True, "yellow")
@@ -118,3 +123,5 @@ while rodando:
     
     pygame.display.flip()
     clock.tick(60)
+
+pygame.quit()

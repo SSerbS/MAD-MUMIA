@@ -127,7 +127,7 @@ class Inimigo(pygame.sprite.Sprite):
             self.rect.centery = int(self.pos.y)
             self.Colisao('y', paredes)
 
-        elif self.EstaVendo(alvo, paredes) == False:
+        elif self.EstaVendo(alvo, paredes) == False or self.distancia > alcance_visao:
             if checar_ultima_posicao_jogador:
                 self.VerificarUltimaPosicao(self.ultima_posicao_jogador, paredes)
 
@@ -203,7 +203,6 @@ class Inimigo(pygame.sprite.Sprite):
 
         if self.pos == ultima_posicao:
             ultima_posicao = None
-
 class Bala(pygame.sprite.Sprite):
     def __init__(self, pos_x, pos_y, pos_mouse):
         super().__init__()
