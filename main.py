@@ -4,8 +4,11 @@ from entidades import *
 from paredes import *
 from coletaveis import *
 from camera import *
+from mixer import AudioManager
 
 pygame.init()
+pygame.mixer.init()
+
 largura_tela = 1280
 altura_tela = 720
 tela = pygame.display.set_mode((largura_tela, altura_tela))
@@ -24,6 +27,10 @@ jogador = Jogador(150, 150)
 inimigo = Inimigo(50, 50, 1, 1, 10)
 inimigo2 = Inimigo(150, 150, 1, 1, 10)
 inimigos.add(inimigo, inimigo2)
+
+sons = AudioManager()
+sons.load_music('musica_play', 'songs/musicas/musica_acao.ogg')
+sons.play_music('musica_play')
 
 
 posicoes_dos_itens = [(200, 100), (700, 375), (600, 250)]
