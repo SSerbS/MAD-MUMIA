@@ -12,6 +12,29 @@ class Jogador(pygame.sprite.Sprite):
         self.velocidade = 4
         self.pos = pygame.math.Vector2(x, y)
 
+        self.cooldown_tiro = 500  # Intervalo em milissegundos (500ms = meio segundo)
+        self.ultimo_tiro = 0      # Armazena o tempo em que o último tiro ocorreu
+        self.balas = 2
+
+    def atirar(self):
+        # Pega o tempo atual
+        agora = pygame.time.get_ticks()
+        if(self.balas > 0):
+            # Verifica se já passou tempo suficiente desde o último tiro
+            if agora - self.ultimo_tiro > self.cooldown_tiro:
+                # Se passou, atualiza o tempo do último tiro para o momento atual
+                self.ultimo_tiro = agora
+                self.balas -= 1
+                # Pega a posição do mouse e cria a bala
+                pos_mouse = pygame.mouse.get_pos()
+                nova_bala = Bala(self.rect.centerx, self.rect.centery, pos_mouse)
+                
+                # Retorna a bala criada para que o loop principal possa adicioná-la aos grupos
+                return nova_bala
+            
+        # Se não passou tempo suficiente, não faz nada (retorna None implicitamente)
+        return None
+
     def update(self, paredes):
 
         self.vel = pygame.math.Vector2(0, 0)
@@ -180,3 +203,35 @@ class Inimigo(pygame.sprite.Sprite):
 
         if self.pos == ultima_posicao:
             ultima_posicao = None
+
+class Bala(pygame.sprite.Sprite):
+    def __init__(self, pos_x, pos_y, pos_mouse):
+        super().__init__()
+        self.image = pygame.Surface([10, 10])
+        self.image.fill((255,0,0))
+        self.rect = self.image.get_rect(center=(pos_x, pos_y))
+        
+        # --- A MÁGICA ACONTECE AQUI ---
+        # 1. Pega a posição do mouse e a posição inicial da bala
+        self.pos_inicial = pygame.math.Vector2(pos_x, pos_y)
+        posicao_mouse_vec = pygame.math.Vector2(pos_mouse)
+        
+        # 2. Calcula o vetor de direção (mouse - jogador) e o normaliza
+        try:
+            self.direcao = (posicao_mouse_vec - self.pos_inicial).normalize()
+        except ValueError:
+            # Caso o vetor seja (0,0), o que acontece se o mouse estiver exatamente
+            # no mesmo lugar do jogador. A normalização daria erro de divisão por zero.
+            self.direcao = pygame.math.Vector2(0, -1) # Atira para cima por padrão
+            
+        # 3. Define a velocidade da bala
+        self.velocidade = 10
+
+    def update(self, tela):
+        # Move a bala na direção calculada
+        self.pos_inicial += self.direcao * self.velocidade
+        self.rect.center = self.pos_inicial
+
+        # Remove a bala se ela sair da tela para não consumir memória
+        if not tela.get_rect().colliderect(self.rect):
+            self.kill()
