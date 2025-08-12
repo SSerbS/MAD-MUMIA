@@ -3,14 +3,19 @@ from entidades import *
 from paredes import *
 from coletaveis import *
 from mixer import AudioManager
+from menu import set_image
 
 pygame.init()
 pygame.mixer.init()
 audio = AudioManager()
 
+#imagem do menu
+menu = set_image("image/imagem menu.jpeg", (800, 720))
+
+
 #dando play na música
-audio.load_music('musica', 'indie-banana-jones/songs/musicas/musica_acao.ogg')
-audio.play_music('musica')
+audio.load_music('music', 'songs/musicas/musica_acao.ogg')
+audio.play_music('music')
 
 tela = pygame.display.set_mode((800, 720))
 pygame.display.set_caption("Sokoban Simples")
@@ -86,30 +91,37 @@ todos_os_sprites.add(todos_coletaveis)
 score = 0
 fonte_score = pygame.font.Font(None, 50)
 
-
+menu_aq = True
 rodando = True
 while rodando:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             rodando = False
+        if menu_aq and event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_RETURN:
+                menu_aq = False
+            
+            if event.key == pygame.K_ESCAPE:
+                rodando = False
 
-    jogador.update(paredes)
-    inimigo.update(jogador, 300, paredes, False)
-    inimigo2.update(jogador, 300, paredes, True)
+    if menu_aq:
+        tela.fill((0, 0, 0))
+        menu.desenhar(tela)
+    else:
+        jogador.update(paredes)
+        inimigo.update(jogador, 300, paredes, False)
+        inimigo2.update(jogador, 300, paredes, True)
 
-    
-    itens_atingidos = pygame.sprite.spritecollide(jogador, todos_coletaveis, True)
-    if itens_atingidos != []:
-        print("coletou")
-        score += len(itens_atingidos) 
-   
-    
-    tela.fill((30, 30, 30))
-    todos_os_sprites.draw(tela)
-   
-    score_texto = fonte_score.render(f"{score}", True, "green")
-    tela.blit(score_texto, (20, 20))
+        tela.fill((30, 30, 30))
+        todos_os_sprites.draw(tela)
 
-    
+        itens_atingidos = pygame.sprite.spritecollide(jogador, todos_coletaveis, True)
+        if itens_atingidos:
+            print("coletou")
+            score += len(itens_atingidos)
+
+        score_texto = fonte_score.render(f"{score}", True, "green")
+        tela.blit(score_texto, (20, 20))
+
     pygame.display.flip()
     clock.tick(60)
