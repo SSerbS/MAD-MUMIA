@@ -2,7 +2,16 @@ import pygame
 from entidades import *
 from paredes import *
 from coletaveis import *
+from mixer import AudioManager
+
 pygame.init()
+pygame.mixer.init()
+audio = AudioManager()
+
+#dando play na música
+audio.load_music('musica', 'indie-banana-jones/songs/musicas/musica_acao.ogg')
+audio.play_music('musica')
+
 tela = pygame.display.set_mode((800, 720))
 pygame.display.set_caption("Sokoban Simples")
 clock = pygame.time.Clock()
