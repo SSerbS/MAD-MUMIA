@@ -6,8 +6,8 @@ from coletaveis import *
 from camera import *
 
 pygame.init()
-largura_tela = 1280
-altura_tela = 720
+largura_tela = 960
+altura_tela = 960
 tela = pygame.display.set_mode((largura_tela, altura_tela))
 pygame.display.set_caption("Sokoban Simples")
 clock = pygame.time.Clock()

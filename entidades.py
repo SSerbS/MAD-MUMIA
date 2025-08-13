@@ -65,9 +65,7 @@ class Jogador(pygame.sprite.Sprite):
         self.Colisao('y', paredes)
 
     def Colisao(self, direcao, paredes):
-
         self.colisoes = pygame.sprite.spritecollide(self, paredes.sprites(), False)
-
         for parede in self.colisoes:
             if direcao == 'x':
                 if self.vel.x > 0: 
