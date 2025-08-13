@@ -142,6 +142,7 @@ fonte_municao = pygame.font.Font(None, 40)
 
 #setando imagem do menu
 initial = True
+
 background_img = pygame.image.load('image/MAPA PRONTO.png').convert()
 background_img = pygame.transform.scale(background_img, (largura_mundo, altura_mundo))
 background_rect = background_img.get_rect() # Cria um rect para o fundo, na posição (0,0)
@@ -150,11 +151,12 @@ fade_duration = 2000
 fade_started = False
 rodando = True
 
-# Carregue as imagens para as telas do jogo
+
 menu = set_image('image/imagem menu.jpeg', (largura_tela, altura_tela))
 game_over = set_image('image/TELA DERROTA.png', (largura_tela, altura_tela))
 vitoria = set_image('image/TELA VITÓRIA.png', (largura_tela, altura_tela))
 background = set_image('image/MAPA PRONTO.png', (largura_tela, altura_tela))
+
 
 def desenhar_hud(tela, jogador, fonte):
     # --- VIDA ---
@@ -238,6 +240,7 @@ def reiniciar_jogo():
 # SUBSTITUA TODO O SEU 'while rodando:' POR ESTE BLOCO COMPLETO
 # ====================================================================================
 font = pygame.font.SysFont('arial', 20, True, True)
+
 rodando = True
 while rodando:
     # --- 1. LOOP DE EVENTOS GERAL ---
@@ -254,6 +257,7 @@ while rodando:
             if estado_jogo == "MENU" and event.key == pygame.K_RETURN:
                 sons.play_control('321', 'play')
                 sons.play_control('iniciando', 'play')
+
                 estado_jogo = "JOGANDO"
                 pygame.mixer.music.fadeout(fade_duration)
                 fade_start_time = pygame.time.get_ticks()
@@ -287,6 +291,7 @@ while rodando:
             if event.key == pygame.K_RIGHT:
                 volume_sound += 0.1 if volume_sound < 1 else 0
                 sons.set_sound_volume(volume_sound)
+
         
         # Evento de atirar com o mouse, que só funciona quando estamos jogando
         if estado_jogo == "JOGANDO" and event.type == pygame.MOUSEBUTTONDOWN:
@@ -295,8 +300,6 @@ while rodando:
                 if bala:
                     todos_os_sprites.add(bala)
                     balas.add(bala)
-
-        
 
     # --- 2. LÓGICA E DESENHO DE CADA ESTADO ---
 
@@ -351,8 +354,10 @@ while rodando:
             elif isinstance(item, Baterias):
                 jogador.baterias_coletadas += 1
                 sons.play_control('coin', 'play')
-
-            
+            elif isinstance(item, Balas):
+                jogador.balas += 5
+            elif isinstance(item, Baterias):
+                jogador.baterias_coletadas += 1
         
         # Dano contínuo ao jogador
         inimigos_em_contato = pygame.sprite.spritecollide(jogador, inimigos, False)
@@ -370,6 +375,10 @@ while rodando:
         if jogador.vida <= 0:
             jogador.vida = 0 # Garante que a vida não fique negativa no HUD
             sons.play_music('game over', 1)
+
+            estado_jogo = "VITORIA"
+        if jogador.vida <= 0:
+            jogador.vida = 0 # Garante que a vida não fique negativa no HUD
             estado_jogo = "GAME_OVER"
 
         # --- Desenho de Todos os Elementos do Jogo ---
@@ -384,6 +393,11 @@ while rodando:
 
     elif estado_jogo == "VITORIA":
         vitoria.desenhar(tela)
+
+    # --- 3. ATUALIZAÇÃO FINAL DA TELA ---
+    # Isso acontece uma vez por frame, independente do estado do jogo
+    pygame.display.flip()
+    clock.tick(60)
 
     # --- 3. ATUALIZAÇÃO FINAL DA TELA ---
     # Isso acontece uma vez por frame, independente do estado do jogo

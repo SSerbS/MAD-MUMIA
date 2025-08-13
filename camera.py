@@ -24,4 +24,3 @@ class Camera:
         y = max(-(self.altura - self.camera_pos.height), y) # Impede de ir além da borda de baixo
 
         self.camera_pos.topleft = (x, y)
-        

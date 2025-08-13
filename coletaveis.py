@@ -42,3 +42,4 @@ class Coracao(Item_coletavel):
 
         # Chama o __init__ da classe pai para criar o rect a partir da imagem
         super().__init__(x, y)
+

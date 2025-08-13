@@ -107,6 +107,7 @@ class Jogador(pygame.sprite.Sprite):
             if self.andando:
                 efeitos_sonoros.play_control('passos', 'stop')
                 self.andando = False
+
         else:
             self.estado_atual = 'andando'
             if self.vel.length() != 0:
@@ -117,7 +118,6 @@ class Jogador(pygame.sprite.Sprite):
                     efeitos_sonoros.play_control('passos', 'play')
                     self.andando = True
 
-        
 
         
         self.animar()
