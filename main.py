@@ -142,11 +142,12 @@ while rodando:
                 sons.set_music_volume(1)
 
         #loop normal
-        jogador.update(paredes)
+        jogador.update(paredes, the_camera)
         inimigo.update(jogador, 300, paredes, False)
         inimigo2.update(jogador, 300, paredes, True)
         the_camera.update(jogador)
 
+        
         itens_atingidos = pygame.sprite.spritecollide(jogador, todos_coletaveis, True)
         if itens_atingidos != []:
             print("coletou")
@@ -167,7 +168,8 @@ while rodando:
         tela.fill("darkgreen")
         for sprite in todos_os_sprites:
             tela.blit(sprite.image, the_camera.apply(sprite))
-    
+            
+        tela.blit(jogador.arma.image, the_camera.apply(jogador.arma))
         score_texto = fonte_score.render(f"{score}", True, "green")
         tela.blit(score_texto, (20, 20))
         municao_texto = fonte_municao.render(f"Balas: {jogador.balas}", True, "yellow")
