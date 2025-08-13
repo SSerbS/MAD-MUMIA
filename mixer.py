@@ -4,6 +4,8 @@ import pygame
 class AudioManager:
     def __init__(self):
         pygame.mixer.init()
+        pygame.mixer.set_num_channels(32)
+
         self.sounds = {}
         self.musics = {}
 
