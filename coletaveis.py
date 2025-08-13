@@ -11,7 +11,7 @@ class Balas(Item_coletavel):
         self.image.fill("green")
         super().__init__(x, y)
 
-class Moedas(Item_coletavel):
+class Baterias(Item_coletavel):
     def __init__(self, x, y):
         self.image = pygame.Surface((20,20))
         self.image.fill("gold")
