@@ -47,15 +47,15 @@ sons.set_music_volume(1)
 # Layout do nível
 layout = [
     "PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP",
-    "P E        E                    P",
     "P                               P",
-    "P    E                        E P",
+    "P                               P",
+    "P    E             E          E P",
     "P      J                        P",
     "P          E                    P",
     "P                               P",
     "P E                  E          P",
     "P                               P",
-    "P                               P",
+    "P                 E             P",
     "P    E                        E P",
     "P                               P",
     "P          E                    P",
@@ -103,7 +103,7 @@ for id_linha, linha in enumerate(layout):
 
 # 3. Defina quantos itens de cada tipo você quer
 num_coracoes = 5
-num_balas = 10
+num_balas = 5
 num_baterias = 10
 total_itens = num_coracoes + num_balas + num_baterias
 
@@ -295,8 +295,15 @@ while rodando:
         
         # Evento de atirar com o mouse, que só funciona quando estamos jogando
         if estado_jogo == "JOGANDO" and event.type == pygame.MOUSEBUTTONDOWN:
-            if event.button == 1: # Botão esquerdo do mouse
-                bala = jogador.atirar()
+            if event.button == 1:
+                # Pega a posição do mouse na TELA
+                pos_mouse_tela = pygame.mouse.get_pos()
+                # CONVERTE para a posição no MUNDO usando a câmera
+                pos_mouse_mundo = (pos_mouse_tela[0] - the_camera.camera_pos.x, 
+                                   pos_mouse_tela[1] - the_camera.camera_pos.y)
+
+                # Passa a posição correta do mundo como argumento
+                bala = jogador.atirar(pos_mouse_mundo)
                 if bala:
                     todos_os_sprites.add(bala)
                     balas.add(bala)
@@ -335,7 +342,7 @@ while rodando:
         jogador.update(paredes)
         inimigos.update(jogador, 300, paredes, True)
         the_camera.update(jogador)
-        balas.update(tela)
+        balas.update()
 
         # --- Lógica de Colisões e Regras do Jogo ---
         # Colisão de balas
@@ -399,9 +406,5 @@ while rodando:
     pygame.display.flip()
     clock.tick(60)
 
-    # --- 3. ATUALIZAÇÃO FINAL DA TELA ---
-    # Isso acontece uma vez por frame, independente do estado do jogo
-    pygame.display.flip()
-    clock.tick(60)
 
 pygame.quit()
