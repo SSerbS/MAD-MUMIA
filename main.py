@@ -153,8 +153,9 @@ while rodando:
             score += len(itens_atingidos) 
         teclas_mouse = pygame.mouse.get_pressed()
         if teclas_mouse[0]:
-            pos_mouse = pygame.mouse.get_pos()
-            bala = jogador.atirar()
+            pos_mouse_tela = pygame.mouse.get_pos()
+            pos_mouse_mundo = the_camera.screen_to_world(pos_mouse_tela)
+            bala = jogador.atirar(pos_mouse_mundo)
             if bala:
                 todos_os_sprites.add(bala)
                 balas.add(bala)

@@ -23,7 +23,12 @@ class Jogador(pygame.sprite.Sprite):
         self.ultimo_tiro = 0      # Armazena o tempo em que o último tiro ocorreu
         self.balas = 2
 
-    def atirar(self):
+        # --- ATRIBUTOS PARA INVENCIBILIDADE E DANO ---
+        self.invencivel = False
+        self.tempo_invencibilidade = 1000 # Duração da invencibilidade em milissegundos (1 segundo)
+        self.ultimo_dano = 0 # Tempo em que o último dano foi sofrido
+
+    def atirar(self, pos_alvo):
         # Pega o tempo atual
         agora = pygame.time.get_ticks()
         if(self.balas > 0):
@@ -34,7 +39,7 @@ class Jogador(pygame.sprite.Sprite):
                 self.balas -= 1
                 # Pega a posição do mouse e cria a bala
                 pos_mouse = pygame.mouse.get_pos()
-                nova_bala = Bala(self.rect.centerx, self.rect.centery, pos_mouse)
+                nova_bala = Bala(self.rect.centerx, self.rect.centery, pos_alvo)
                 efeitos_sonoros.play_control('tiro', 'play')
                 # Retorna a bala criada para que o loop principal possa adicioná-la aos grupos
                 return nova_bala
