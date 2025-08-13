@@ -4,8 +4,12 @@ from entidades import *
 from paredes import *
 from coletaveis import *
 from camera import *
+from mixer import AudioManager
+from image import *
 
 pygame.init()
+pygame.mixer.init()
+
 largura_tela = 960
 altura_tela = 960
 tela = pygame.display.set_mode((largura_tela, altura_tela))
@@ -24,6 +28,13 @@ jogador = Jogador(150, 150)
 inimigo = Inimigo(50, 50, 1, 1, 10)
 inimigo2 = Inimigo(150, 150, 1, 1, 10)
 inimigos.add(inimigo, inimigo2)
+
+sons = AudioManager()
+
+sons.load_music('musica menu', 'songs/musicas/musica_menu.ogg')
+sons.load_music('musica play', 'songs/musicas/musica_acao.ogg')
+sons.play_music('musica menu')
+sons.set_music_volume(1)
 
 
 posicoes_dos_itens = [(200, 100), (700, 375), (600, 250)]
@@ -85,44 +96,83 @@ score = 0
 fonte_score = pygame.font.Font(None, 50)
 fonte_municao = pygame.font.Font(None, 40)
 
+#setando imagem do menu
+initial = True
+menu = set_image('image/imagem menu.jpeg', (largura_tela, altura_tela))
 
+#configurações pra tocar a música
+fade_duration = 2000
+fade_started = False
 rodando = True
 while rodando:
+    #parte inicial
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             rodando = False
+        elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_ESCAPE:
+                rodando = False
+            if event.key == pygame.K_RETURN and initial:
+                pygame.mixer.music.fadeout(fade_duration)
+                fade_start_time = pygame.time.get_ticks()
+                initial = False
 
-    jogador.update(paredes)
-    inimigo.update(jogador, 300, paredes, False)
-    inimigo2.update(jogador, 300, paredes, True)
-    the_camera.update(jogador)
+    if initial:
+        menu.desenhar(tela)
+        pygame.display.flip()
+    else:
+        # Depois que sair do menu, aguarda o fadeout acabar para tocar a música do jogo
+        if not fade_started:
+            now = pygame.time.get_ticks()
+            if now - fade_start_time >= fade_duration:
+                sons.play_music('musica play')
+                sons.set_music_volume(0)
+                fade_in_start = pygame.time.get_ticks()
+                fade_started = True
 
-    itens_atingidos = pygame.sprite.spritecollide(jogador, todos_coletaveis, True)
-    if itens_atingidos != []:
-        print("coletou")
-        score += len(itens_atingidos) 
-    teclas_mouse = pygame.mouse.get_pressed()
-    if teclas_mouse[0]:
-        pos_mouse = pygame.mouse.get_pos()
-        bala = jogador.atirar()
-        if bala:
-            todos_os_sprites.add(bala)
-            balas.add(bala)
+        # Se a música do jogo já está tocando, faça o fade in (aumentar volume gradativamente)
+        if fade_started:
+            now = pygame.time.get_ticks()
+            elapsed = now - fade_in_start
+            fade_in_duration = 3000  # 3 segundos fade in
+            if elapsed < fade_in_duration:
+                volume = elapsed / fade_in_duration
+                sons.set_music_volume(volume)
+            else:
+                sons.set_music_volume(1)
 
-    balas.update(tela)
-    pygame.sprite.groupcollide(balas, paredes, True, False)
-    pygame.sprite.groupcollide(balas, inimigos, True, True)
+        #loop normal
+        jogador.update(paredes)
+        inimigo.update(jogador, 300, paredes, False)
+        inimigo2.update(jogador, 300, paredes, True)
+        the_camera.update(jogador)
+
+        itens_atingidos = pygame.sprite.spritecollide(jogador, todos_coletaveis, True)
+        if itens_atingidos != []:
+            print("coletou")
+            score += len(itens_atingidos) 
+        teclas_mouse = pygame.mouse.get_pressed()
+        if teclas_mouse[0]:
+            pos_mouse = pygame.mouse.get_pos()
+            bala = jogador.atirar()
+            if bala:
+                todos_os_sprites.add(bala)
+                balas.add(bala)
+
+        balas.update(tela)
+        pygame.sprite.groupcollide(balas, paredes, True, False)
+        pygame.sprite.groupcollide(balas, inimigos, True, True)
+        
+        tela.fill("darkgreen")
+        for sprite in todos_os_sprites:
+            tela.blit(sprite.image, the_camera.apply(sprite))
     
-    tela.fill("darkgreen")
-    for sprite in todos_os_sprites:
-        tela.blit(sprite.image, the_camera.apply(sprite))
-   
-    score_texto = fonte_score.render(f"{score}", True, "green")
-    tela.blit(score_texto, (20, 20))
-    municao_texto = fonte_municao.render(f"Balas: {jogador.balas}", True, "yellow")
-    tela.blit(municao_texto, (10, 670))
-    
-    pygame.display.flip()
-    clock.tick(60)
+        score_texto = fonte_score.render(f"{score}", True, "green")
+        tela.blit(score_texto, (20, 20))
+        municao_texto = fonte_municao.render(f"Balas: {jogador.balas}", True, "yellow")
+        tela.blit(municao_texto, (10, 670))
+        
+        pygame.display.flip()
+        clock.tick(60)
 
 pygame.quit()

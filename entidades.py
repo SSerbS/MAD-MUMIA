@@ -1,4 +1,11 @@
 import pygame
+
+#imporatndo efeitos sonoros
+from mixer import AudioManager
+
+efeitos_sonoros = AudioManager()
+efeitos_sonoros.load_sound('tiro', 'songs/tiroprovisorio.wav')
+efeitos_sonoros.load_sound('passos', 'songs/step_grass.wav')
   
 class Jogador(pygame.sprite.Sprite):
 
@@ -28,7 +35,7 @@ class Jogador(pygame.sprite.Sprite):
                 # Pega a posição do mouse e cria a bala
                 pos_mouse = pygame.mouse.get_pos()
                 nova_bala = Bala(self.rect.centerx, self.rect.centery, pos_mouse)
-                
+                efeitos_sonoros.play_control('tiro', 'play')
                 # Retorna a bala criada para que o loop principal possa adicioná-la aos grupos
                 return nova_bala
             
@@ -40,6 +47,7 @@ class Jogador(pygame.sprite.Sprite):
         self.vel = pygame.math.Vector2(0, 0)
 
         teclas = pygame.key.get_pressed()
+
         if teclas[pygame.K_a]:
             self.vel.x = -self.velocidade
         if teclas[pygame.K_d]:
@@ -53,6 +61,13 @@ class Jogador(pygame.sprite.Sprite):
         if self.vel.length() != 0: 
             self.vel.normalize_ip()
             self.vel *= self.velocidade
+
+            if not hasattr(self, 'passo_channel') or not self.passo_channel.get_busy():
+                self.passo_channel = efeitos_sonoros.sounds['passos'].play()
+        else:
+    # Opcional: parar o som se parar de andar
+            if hasattr(self, 'passo_channel') and self.passo_channel.get_busy():
+                self.passo_channel.stop()
 
 
         self.pos.x += self.vel.x
@@ -201,6 +216,8 @@ class Inimigo(pygame.sprite.Sprite):
 
         if self.pos == ultima_posicao:
             ultima_posicao = None
+
+#logica do tiro
 class Bala(pygame.sprite.Sprite):
     def __init__(self, pos_x, pos_y, pos_mouse):
         super().__init__()
