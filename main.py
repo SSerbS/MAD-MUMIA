@@ -457,6 +457,7 @@ while rodando:
             # Verifica se já passou o tempo de cooldown para tomar dano de novo.
             if agora - jogador.ultimo_dano_tempo > jogador.dano_cooldown:
                 jogador.ultimo_dano_tempo = agora # Reseta o timer do dano.
+                jogador.ultimo_flash_tempo = agora
                 jogador.vida -= 1 # Causa dano ao jogador.
         
         # --- Checagem de Condições de Vitória/Derrota ---

@@ -78,6 +78,7 @@ class Jogador(pygame.sprite.Sprite):
         # Timer para controlar o intervalo entre danos recebidos.
         self.ultimo_dano_tempo = 0
         self.dano_cooldown = 100 # Cooldown de 100ms para receber dano.
+        self.ultimo_flash_tempo = 0
 
         # --- ATRIBUTOS DE MOVIMENTO E AÇÃO ---
         self.velocidade = 5 # Velocidade de movimento do jogador.
@@ -107,7 +108,7 @@ class Jogador(pygame.sprite.Sprite):
             # Salva o centro do retângulo atual para evitar que o sprite "pule" ao trocar de frame.
             centro_antigo = self.rect.center
             # Atualiza a imagem do sprite para o novo frame.
-            self.image = lista_frames[self.frame_atual]
+            self.image = lista_frames[self.frame_atual].copy()
             # Recria o retângulo com a nova imagem, mas no mesmo centro de antes.
             self.rect = self.image.get_rect(center=centro_antigo)
 
@@ -165,6 +166,13 @@ class Jogador(pygame.sprite.Sprite):
 
         # Atualiza a posição da arma flutuante.
         self.arma.update(self.rect.center, camera)
+
+        agora = pygame.time.get_ticks()
+        
+        # Se faz menos de 150ms que o flash começou...
+        if agora - self.ultimo_flash_tempo < 150:
+            # ... aplica o filtro vermelho.
+            self.image.fill((100, 0, 0), special_flags=pygame.BLEND_RGB_ADD)
         
     def atirar(self, pos_mouse_mundo):
         """Cria e retorna um objeto Bala se o jogador puder atirar."""
