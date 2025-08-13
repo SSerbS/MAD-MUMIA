@@ -29,13 +29,17 @@ inimigo = Inimigo(50, 50, 1, 1, 10)
 inimigo2 = Inimigo(150, 150, 1, 1, 10)
 inimigos.add(inimigo, inimigo2)
 
+#configuracoes de som
+
 sons = AudioManager()
+volume_musica = 0.8
+volume_sound = 0.8
 
 sons.load_music('musica menu', 'songs/musicas/musica_menu.ogg')
 sons.load_music('musica play', 'songs/musicas/musica_acao.ogg')
 sons.play_music('musica menu')
-sons.set_music_volume(1)
-
+sons.load_sound('coin', 'songs/smw_coin.wav')
+sons.load_sound('321', 'songs/01._3_2_1.wav')
 
 posicoes_dos_itens = [(200, 100), (700, 375), (600, 250)]
 
@@ -113,9 +117,29 @@ while rodando:
             if event.key == pygame.K_ESCAPE:
                 rodando = False
             if event.key == pygame.K_RETURN and initial:
+                sons.play_control('321', 'play')
                 pygame.mixer.music.fadeout(fade_duration)
                 fade_start_time = pygame.time.get_ticks()
                 initial = False
+
+            #controle de volume
+            # em resposta a um evento teclado:
+        if event.type == pygame.KEYUP:
+            if event.key == pygame.K_UP:
+                volume_musica += 0.1 if volume_musica < 1 else 0
+                sons.set_music_volume(volume_musica)
+
+            if event.key == pygame.K_DOWN :
+                volume_musica -= 0.1 if volume_musica > 0 else 0
+                sons.set_music_volume(volume_musica)
+
+            if event.key == pygame.K_LEFT:  # exemplo para efeitos sonoros
+                volume_sound -= 0.1 if volume_sound > 0 else 0
+                sons.set_sound_volume(volume_sound)
+
+            if event.key == pygame.K_RIGHT:
+                volume_sound += 0.1 if volume_sound < 1 else 0
+                sons.set_sound_volume(volume_sound)
 
     if initial:
         menu.desenhar(tela)
@@ -137,9 +161,11 @@ while rodando:
             fade_in_duration = 3000  # 3 segundos fade in
             if elapsed < fade_in_duration:
                 volume = elapsed / fade_in_duration
-                sons.set_music_volume(volume)
-            else:
-                sons.set_music_volume(1)
+                sons.set_music_volume(volume_musica)
+
+            
+                
+            
 
         #loop normal
         jogador.update(paredes)
@@ -150,6 +176,7 @@ while rodando:
         itens_atingidos = pygame.sprite.spritecollide(jogador, todos_coletaveis, True)
         if itens_atingidos != []:
             print("coletou")
+            sons.play_control('coin', 'play')
             score += len(itens_atingidos) 
         teclas_mouse = pygame.mouse.get_pressed()
         if teclas_mouse[0]:
