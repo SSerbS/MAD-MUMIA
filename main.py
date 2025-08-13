@@ -236,9 +236,7 @@ def reiniciar_jogo():
     todos_os_sprites.add(inimigos) # Adiciona o grupo de inimigos
     todos_os_sprites.add(todos_coletaveis) # Adiciona o grupo de coletáveis
     
-# ====================================================================================
-# SUBSTITUA TODO O SEU 'while rodando:' POR ESTE BLOCO COMPLETO
-# ====================================================================================
+
 font = pygame.font.SysFont('arial', 20, True, True)
 
 rodando = True
@@ -339,7 +337,7 @@ while rodando:
                 sons.set_music_volume(volume_musica)
 
         # --- Lógica de Update dos Sprites ---
-        jogador.update(paredes)
+        jogador.update(paredes, the_camera)
         inimigos.update(jogador, 300, paredes, True)
         the_camera.update(jogador)
         balas.update()
@@ -394,7 +392,7 @@ while rodando:
         for sprite in todos_os_sprites:
             tela.blit(sprite.image, the_camera.apply(sprite))
         desenhar_hud(tela, jogador, fonte_municao)
-
+        tela.blit(jogador.arma.image, the_camera.apply(jogador.arma))
     elif estado_jogo == "GAME_OVER":
         game_over.desenhar(tela)
 

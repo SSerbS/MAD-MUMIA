@@ -1,5 +1,5 @@
 import pygame
-
+import math
 #imporatndo efeitos sonoros
 from mixer import AudioManager
 
@@ -68,6 +68,9 @@ class Jogador(pygame.sprite.Sprite):
         self.cooldown_tiro = 500
         self.ultimo_tiro = 0
         self.balas = 0 
+
+        self.arma = ArmaFlutuante(self)
+        self.arma_grupo = pygame.sprite.GroupSingle(self.arma)
         
     def animar(self):
 
@@ -82,7 +85,7 @@ class Jogador(pygame.sprite.Sprite):
             self.image = lista_frames[self.frame_atual]
             self.rect = self.image.get_rect(center=centro_antigo)
 
-    def update(self, paredes):
+    def update(self, paredes, camera):
 
         self.vel = pygame.math.Vector2(0, 0)
         teclas = pygame.key.get_pressed()
@@ -117,8 +120,6 @@ class Jogador(pygame.sprite.Sprite):
                 if not self.andando:
                     efeitos_sonoros.play_control('passos', 'play')
                     self.andando = True
-
-
         
         self.animar()
         
@@ -131,20 +132,44 @@ class Jogador(pygame.sprite.Sprite):
         self.pos.y += self.vel.y
         self.rect.centery = int(self.pos.y)
         self.Colisao('y', paredes)
+
+        self.arma.update(self.rect.center, camera)
         
-    # MÉTODO atirar CORRIGIDO na classe Jogador
-    def atirar(self, pos_mouse_mundo): # <<< Aceita a posição correta como argumento
+    def atirar(self, pos_mouse_mundo): # O argumento já é a posição de mundo correta
         agora = pygame.time.get_ticks()
-        if(self.balas > 0):
+        if self.balas > 0:
             if agora - self.ultimo_tiro > self.cooldown_tiro:
                 self.ultimo_tiro = agora
                 self.balas -= 1
                 efeitos_sonoros.play_control('tiro', 'play')
                 
-                # Usa o argumento recebido em vez de chamar get_pos()
-                nova_bala = Bala(self.rect.centerx, self.rect.centery, pos_mouse_mundo)
+                # --- CÁLCULO PRECISO DA POSIÇÃO DA "BOCA" DA ARMA ---
+
+                # 1. Pega a posição de MUNDO do jogador.
+                pos_jogador_mundo = self.rect.center
+
+                # 2. Calcula o vetor e o ângulo para a mira (em coordenadas de mundo)
+                #    Esta lógica é idêntica à da ArmaFlutuante para garantir sincronia.
+                vetor_x = pos_mouse_mundo[0] - pos_jogador_mundo[0]
+                vetor_y = pos_mouse_mundo[1] - pos_jogador_mundo[1]
+                angulo_radianos = math.atan2(-vetor_y, vetor_x)
+                
+                # 3. Calcula o deslocamento da ponta da arma em relação ao centro do jogador
+                #    Usa a mesma distância que a arma flutua do jogador.
+                boca_offset_x = math.cos(angulo_radianos) * self.arma.distancia_do_jogador
+                boca_offset_y = -math.sin(angulo_radianos) * self.arma.distancia_do_jogador
+                
+                # 4. Calcula a posição final da "boca" da arma no mundo
+                posicao_boca_x = pos_jogador_mundo[0] + boca_offset_x
+                posicao_boca_y = pos_jogador_mundo[1] + boca_offset_y
+                
+                # 5. Cria a nova bala a partir da posição exata da "boca"
+                #    A posição do alvo (pos_mouse_mundo) já vem como argumento.
+                nova_bala = Bala(posicao_boca_x, posicao_boca_y, pos_mouse_mundo)
                 
                 return nova_bala
+                
+        # Se não atirou (sem balas ou em cooldown), retorna None
         return None
 
     def Colisao(self, direcao, paredes):
@@ -401,3 +426,59 @@ class Bala(pygame.sprite.Sprite):
 
         if pygame.time.get_ticks() - self.spawn_time > self.vida_util:
             self.kill()
+
+class ArmaFlutuante(pygame.sprite.Sprite):
+    def __init__(self, jogador):
+        super().__init__()
+        self.jogador = jogador 
+
+        self.distancia_do_jogador = 40 #Distância fixa para a translação
+
+        self.imagem_original = pygame.image.load('image/arma.png').convert_alpha()
+        self.imagem_original = pygame.transform.scale(self.imagem_original, (75, 75))
+        self.image = self.imagem_original.copy()
+        self.rect = self.image.get_rect(center=self.jogador.rect.center)
+
+
+    # Na classe ArmaFlutuante
+
+    def update(self, pos_jogador_mundo, camera):
+        # Etapa 1: Converter coordenadas do mouse para o mundo
+        pos_mouse_tela = pygame.mouse.get_pos()
+        pos_mouse_mundo = camera.screen_to_world(pos_mouse_tela)
+        pos_jogador = pos_jogador_mundo
+
+        # Etapa 2: Calcular o vetor para o mouse
+        vetor_x = pos_mouse_mundo[0] - pos_jogador[0]
+        vetor_y = pos_mouse_mundo[1] - pos_jogador[1]
+
+        # Etapa 3: Calcular o ângulo original da direção
+        # Usamos -vetor_y para alinhar com o sistema de ângulos do Pygame (90° = para cima)
+        angulo_radianos = math.atan2(-vetor_y, vetor_x)
+        angulo_graus = math.degrees(angulo_radianos)
+
+        # Etapa 4: Decidir se espelha e qual ângulo final usar
+        if -90 <= angulo_graus <= 90:
+            # A arma aponta para a direita: não precisa espelhar.
+            # Usamos a imagem e o ângulo originais.
+            imagem_para_rotacionar = self.imagem_original
+            angulo_final = angulo_graus
+        else:
+            # A arma aponta para a esquerda: precisa espelhar e ajustar o ângulo.
+            # 1. Usa a imagem espelhada horizontalmente.
+            imagem_para_rotacionar = pygame.transform.flip(self.imagem_original, True, False)
+            # 2. Ajusta o ângulo para compensar o espelhamento.
+            angulo_final = angulo_graus + 180
+
+        # Etapa 5: Aplicar a rotação final
+        self.image = pygame.transform.rotate(imagem_para_rotacionar, angulo_final)
+
+        # Etapa 6: Calcular a translação (posição da arma)
+        # A posição ainda usa o ângulo original (angulo_radianos) para ser correta.
+        deslocamento_x = math.cos(angulo_radianos) * self.distancia_do_jogador
+        deslocamento_y = -math.sin(angulo_radianos) * self.distancia_do_jogador
+        pos_final_x = pos_jogador[0] + deslocamento_x
+        pos_final_y = pos_jogador[1] + deslocamento_y
+
+        # Etapa 7: Atualizar o rect com a posição e o tamanho da imagem rotacionada
+        self.rect = self.image.get_rect(center=(pos_final_x, pos_final_y))

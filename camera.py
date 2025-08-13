@@ -9,6 +9,13 @@ class Camera:
     def apply(self, sprite):
         return sprite.rect.move(self.camera_pos.topleft)
     
+    def screen_to_world(self, pos_tela):
+        #Converte uma coordenada da tela para uma coordenada do mundo.
+        x_tela, y_tela = pos_tela
+        x_mundo = x_tela - self.camera_pos.x
+        y_mundo = y_tela - self.camera_pos.y
+        return (x_mundo, y_mundo)
+    
     def apply_rect(self, rect):
         """Aplica o deslocamento da câmera a um retângulo qualquer."""
         return rect.move(self.camera_pos.topleft)
