@@ -103,6 +103,7 @@ fonte_municao = pygame.font.Font(None, 40)
 #setando imagem do menu
 initial = True
 menu = set_image('image/imagem menu.jpeg', (largura_tela, altura_tela))
+font = pygame.font.SysFont('arial', 20, True, True)
 
 #configurações pra tocar a música
 fade_duration = 2000
@@ -130,11 +131,11 @@ while rodando:
                 sons.set_music_volume(volume_musica)
 
             if event.key == pygame.K_DOWN :
-                volume_musica -= 0.1 if volume_musica > 0 else 0
+                volume_musica -= 0.1 if volume_musica >= 0.1 else 0
                 sons.set_music_volume(volume_musica)
 
             if event.key == pygame.K_LEFT:  # exemplo para efeitos sonoros
-                volume_sound -= 0.1 if volume_sound > 0 else 0
+                volume_sound -= 0.1 if volume_sound >= 0.1 else 0
                 sons.set_sound_volume(volume_sound)
 
             if event.key == pygame.K_RIGHT:
@@ -143,6 +144,13 @@ while rodando:
 
     if initial:
         menu.desenhar(tela)
+        mensage = f'musica: {int(volume_musica * 100)}'
+        mesage2 = f'efeitos sonoros: {int(volume_sound * 100)}'
+        txt1 = font.render(mensage, False, (255, 255, 255))
+        txt2 = font.render(mesage2, False, (255, 255, 255))
+
+        tela.blit(txt2, (5, 10))
+        tela.blit(txt1, (5, 30))
         pygame.display.flip()
     else:
         # Depois que sair do menu, aguarda o fadeout acabar para tocar a música do jogo
