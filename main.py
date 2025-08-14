@@ -46,6 +46,7 @@ jogador = Jogador(150, 150)
 
 # Cria uma instância do gerenciador de áudio.
 sons = AudioManager()
+
 # Define os volumes iniciais para música e efeitos sonoros.
 volume_musica = 0.8
 volume_sound = 0.8
@@ -58,14 +59,15 @@ sons.load_music('game over', 'songs/musicas/game_overpaezao.mp3')
 sons.load_music('zerou game', 'songs/musicas/musica_zerou_game.mp3')
 # Toca a música do menu assim que o jogo começa.
 sons.play_music('musica menu')
+
 # Carrega os arquivos de efeitos sonoros.
 sons.load_sound('coin', 'songs/smw_coin.wav')
 sons.load_sound('321', 'songs/01._3_2_1.wav')
 sons.load_sound('recuperando vida', 'songs/recuperando_vida.wav')
 sons.load_sound('suporte aerio', 'songs/pedindo_apoio_aério.wav')
 sons.load_sound('iniciando', 'songs/iniciando_game.wav')
-# Define o volume inicial da música (o valor é de 0.0 a 1.0).
-sons.set_music_volume(1)
+sons.load_sound('carregando arma', 'songs/carregando_arma.wav')
+sons.load_sound('dano', 'songs/steve_dano.wav')
 
 
 # --- LAYOUT DO NÍVEL ---
@@ -177,10 +179,10 @@ todos_os_sprites.add(jogador)
 
 # --- VARIÁVEIS DE UI (INTERFACE DO USUÁRIO) E FONTES ---
 score = 0
-fonte_score = pygame.font.Font(None, 50) # Fonte para o score (não usado atualmente).
-fonte_municao = pygame.font.Font(None, 40) # Fonte para a HUD do jogo.
-fonte_countdown = pygame.font.Font(None, 250) # Fonte grande para a contagem regressiva.
-fonte_indicador_volume = pygame.font.Font(None, 50) # Fonte para o indicador de volume.
+fonte_score = pygame.font.SysFont('Lucida Console', 20) # Fonte para o score (não usado atualmente).
+fonte_municao = pygame.font.SysFont('Lucida Console', 20) # Fonte para a HUD do jogo.
+fonte_countdown = pygame.font.SysFont('Lucida Console', 250) # Fonte grande para a contagem regressiva.
+fonte_indicador_volume = pygame.font.SysFont('Lucida Console', 40) # Fonte para o indicador de volume.
 
 # Variáveis para controlar a exibição do indicador de volume na tela.
 indicador_volume_texto = "" # O texto a ser mostrado (ex: "Música: 80%").
@@ -192,9 +194,7 @@ countdown_start_time = 0
 
 # Carrega a imagem de fundo do mapa.
 background_img = pygame.image.load('image/MAPA PRONTO.png').convert()
-# Redimensiona a imagem de fundo para cobrir todo o mundo do jogo.
 background_img = pygame.transform.scale(background_img, (largura_mundo, altura_mundo))
-# Obtém o retângulo da imagem de fundo para posicionamento.
 background_rect = background_img.get_rect()
 
 # Variáveis para o controle de fade (transição suave) da música.
@@ -210,26 +210,29 @@ vitoria = set_image('image/TELA VITÓRIA.png', (largura_tela, altura_tela))
 background = set_image('image/MAPA PRONTO.png', (largura_tela, altura_tela))
 
 # --- FUNÇÕES AUXILIARES ---
-
 def desenhar_hud(tela, jogador, fonte):
-    """Desenha a Interface do Usuário (vida, baterias, munição) na tela."""
-    # --- BARRA DE VIDA ---
-    # Desenha o fundo vermelho da barra de vida.
-    pygame.draw.rect(tela, 'red', (10, 10, 200, 25))
-    # Calcula a largura da parte verde da barra de vida proporcionalmente à vida do jogador.
-    vida_atual_largura = (jogador.vida / jogador.vida_maxima) * 200
-    # Desenha a parte verde por cima da vermelha.
-    pygame.draw.rect(tela, 'green', (10, 10, vida_atual_largura, 25))
-    # Renderiza e desenha o texto da vida (ex: "100/100").
-    texto_vida = fonte.render(f"{jogador.vida}/{jogador.vida_maxima}", True, "white")
-    tela.blit(texto_vida, (15, 12))
+    # Fundo do HUD
+    fundo = pygame.Surface((220, 110), pygame.SRCALPHA)
+    fundo.fill((0, 0, 0, 150))
+    tela.blit(fundo, (5, 5))
 
-    # --- CONTADOR DE BATERIAS ---
-    texto_baterias = fonte.render(f"Baterias: {jogador.baterias_coletadas} / 10", True, "yellow")
+    cor_texto = (255, 255, 255)
+    verde_barra = (34, 177, 76)
+    vemelho_barra = (128, 0, 0)
+
+    # --- VIDA ---
+    pygame.draw.rect(tela, vemelho_barra, (10, 10, 200, 25))
+    vida_atual_largura = (jogador.vida / jogador.vida_maxima) * 200
+    pygame.draw.rect(tela, verde_barra, (10, 10, vida_atual_largura, 25))
+    texto_vida = fonte.render(f"{jogador.vida}/{jogador.vida_maxima}", True, cor_texto)
+    tela.blit(texto_vida, (15, 14))
+
+    # --- BATERIAS ---
+    texto_baterias = fonte.render(f"Baterias: {jogador.baterias_coletadas} / 10", True, cor_texto)
     tela.blit(texto_baterias, (10, 45))
 
-    # --- CONTADOR DE MUNIÇÃO ---
-    texto_balas = fonte.render(f"Munição: {jogador.balas}", True, "cyan")
+    # --- MUNIÇÃO ---
+    texto_balas = fonte.render(f"Munição: {jogador.balas}", True, cor_texto)
     tela.blit(texto_balas, (10, 80))
     
 def reiniciar_jogo():
@@ -445,12 +448,13 @@ while rodando:
                 sons.play_control('recuperando vida', 'play')
             elif isinstance(item, Balas): # Se for munição...
                 jogador.balas += 5 # Adiciona balas.
-                sons.play_control('coin', 'play')
+                sons.play_control('carregando arma', 'play')
             elif isinstance(item, Baterias): # Se for uma bateria...
                 jogador.baterias_coletadas += 1 # Incrementa o contador.
                 sons.play_control('coin', 'play')
         
         # Dano contínuo se o jogador estiver em contato com inimigos.
+        
         inimigos_em_contato = pygame.sprite.spritecollide(jogador, inimigos, False)
         if inimigos_em_contato:
             agora = pygame.time.get_ticks()
@@ -458,7 +462,9 @@ while rodando:
             if agora - jogador.ultimo_dano_tempo > jogador.dano_cooldown:
                 jogador.ultimo_dano_tempo = agora # Reseta o timer do dano.
                 jogador.ultimo_flash_tempo = agora
-                jogador.vida -= 1 # Causa dano ao jogador.
+                jogador.vida -= 1 # Causa dano ao jogador
+                if jogador.vida % 2 == 0:
+                    sons.play_control('dano', 'play')
         
         # --- Checagem de Condições de Vitória/Derrota ---
         if jogador.baterias_coletadas >= 10: # Se coletou todas as baterias...
