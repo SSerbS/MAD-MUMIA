@@ -26,7 +26,7 @@ altura_tela = 720
 # Cria a superfície principal da tela com as dimensões definidas.
 tela = pygame.display.set_mode((largura_tela, altura_tela))
 # Define o título que aparecerá na barra da janela.
-pygame.display.set_caption("Sokoban Simples")
+pygame.display.set_caption("Mad Mumia")
 # Cria um objeto Clock para controlar a taxa de quadros por segundo (FPS).
 clock = pygame.time.Clock()
 # Define o estado inicial do jogo. Isso controla qual lógica e tela são mostradas.
