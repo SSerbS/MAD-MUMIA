@@ -204,7 +204,7 @@ rodando = True
 
 # --- CARREGAMENTO DE IMAGENS DE TELA ---
 # Usa a função `set_image` para carregar e escalar as imagens das telas de estado.
-menu = set_image('image/imagem menu.jpeg', (largura_tela, altura_tela))
+menu = set_image('image/imagem menu.jpg', (largura_tela, altura_tela))
 game_over = set_image('image/TELA DERROTA.png', (largura_tela, altura_tela))
 vitoria = set_image('image/TELA VITÓRIA.png', (largura_tela, altura_tela))
 background = set_image('image/MAPA PRONTO.png', (largura_tela, altura_tela))
