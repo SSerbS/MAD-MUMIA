@@ -37,14 +37,14 @@ contém a classe câmera, que permite o enfoque numa parte menor que do mapa, se
 cria a classe AudioManager, com nome autoexplicativo (gerencia o áudio). É instanciada na main para realizar o manejo dos áudios executados.
 
 ### `paredes.py`
-define a classe Parede por conveniência para ser utilizada com barreira invisível.
+define a classe Parede por conveniência para ser utilizada como barreira invisível.
 
 ---
 
 ## 📸 Capturas de tela
 >
 > 
-> ![Menu](<image/imagem menu.jpeg>)
+> ![Menu](<image/imagem menu.jpg>)
 > ![Jogo](image/gameplay.jpeg)
 > ![Jogo](image/gameplay2.jpeg)
 > ![Derrota](<image/TELA DERROTA.png>)
